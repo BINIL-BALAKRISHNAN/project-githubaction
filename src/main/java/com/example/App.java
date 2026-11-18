@@ -1,5 +1,6 @@
 
 
+
 package com.example;
 
 import javax.swing.*;
@@ -12,6 +13,9 @@ public class Calculator extends JFrame implements ActionListener {
     double firstNumber = 0;
     String operator = "";
     boolean newNumber = true;
+
+    // Connect business logic
+    App calculator = new App();
 
     public Calculator() {
 
@@ -71,31 +75,44 @@ public class Calculator extends JFrame implements ActionListener {
         } else if (value.equals("=")) {
 
             if (!operator.isEmpty()) {
-                double secondNumber = Double.parseDouble(display.getText());
-                double result = 0;
 
-                switch (operator) {
-                    case "+":
-                        result = firstNumber + secondNumber;
-                        break;
-                    case "-":
-                        result = firstNumber - secondNumber;
-                        break;
-                    case "*":
-                        result = firstNumber * secondNumber;
-                        break;
-                    case "/":
-                        if (secondNumber == 0) {
-                            display.setText("Cannot divide by zero");
-                            operator = "";
-                            newNumber = true;
+                double secondNumber =
+                    Double.parseDouble(display.getText());
+
+                double result;
+
+                try {
+
+                    switch (operator) {
+
+                        case "+":
+                            result = calculator.add(firstNumber, secondNumber);
+                            break;
+
+                        case "-":
+                            result = calculator.subtract(firstNumber, secondNumber);
+                            break;
+
+                        case "*":
+                            result = calculator.multiply(firstNumber, secondNumber);
+                            break;
+
+                        case "/":
+                            result = calculator.divide(firstNumber, secondNumber);
+                            break;
+
+                        default:
                             return;
-                        }
-                        result = firstNumber / secondNumber;
-                        break;
+                    }
+
+                    display.setText(String.valueOf(result));
+
+                } catch (IllegalArgumentException ex) {
+
+                    display.setText(ex.getMessage());
+
                 }
 
-                display.setText(String.valueOf(result));
                 operator = "";
                 newNumber = true;
             }
@@ -116,4 +133,3 @@ public class Calculator extends JFrame implements ActionListener {
         });
     }
 }
-
