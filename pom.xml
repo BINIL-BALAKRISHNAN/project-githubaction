@@ -17,7 +17,6 @@
     </properties>
 
     <dependencies>
-        <!-- JUnit 5 dependency for testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -28,22 +27,30 @@
 
     <build>
         <plugins>
-
-            <!-- Maven compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
             </plugin>
 
-            <!-- JUnit test execution -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
             </plugin>
-
         </plugins>
     </build>
 
+    <!-- GitHub Packages configuration -->
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/binil-balakrishnan/project-githubaction</url>
+        </repository>
+    </distributionManagement>
+
 </project>
+
+
+     
