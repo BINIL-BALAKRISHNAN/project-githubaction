@@ -1,42 +1,158 @@
 
+package com.example;
 
-name: Pipeline 1 - Build
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
-on:
- workflow_dispatch: 
+public class App extends JFrame implements ActionListener {
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+    private JTextField display;
 
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
+    private double firstNumber = 0;
+    private String operator = "";
+    private boolean newNumber = true;
 
-      - name: Verify project structure
-        run: |
-          test -f pom.xml
-          test -f src/main/java/com/example/App.java
-          test -f src/test/java/com/example/AppTest.java
+    public App() {
 
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: maven
+        // Window configuration
+        setTitle("Java Calculator");
+        setSize(350, 450);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout(5, 5));
 
-      - name: Compile application
-        run: mvn clean compile
+        // Calculator display
+        display = new JTextField("0");
+        display.setFont(new Font("Arial", Font.BOLD, 28));
+        display.setHorizontalAlignment(JTextField.RIGHT);
+        display.setEditable(false);
 
-      - name: Run JUnit tests
-        run: mvn test
+        add(display, BorderLayout.NORTH);
 
-      - name: Package application
-        run: mvn package
+        // Button panel
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(4, 4, 5, 5));
 
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: java-app-jar
-          path: target/*.jar
+        String[] buttons = {
+            "7", "8", "9", "/",
+            "4", "5", "6", "*",
+            "1", "2", "3", "-",
+            "C", "0", "=", "+"
+        };
+
+        // Create buttons
+        for (String text : buttons) {
+
+            JButton button = new JButton(text);
+            button.setFont(new Font("Arial", Font.BOLD, 22));
+            button.addActionListener(this);
+
+            panel.add(button);
+        }
+
+        add(panel, BorderLayout.CENTER);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        String value = e.getActionCommand();
+
+        // Number button
+        if (value.matches("[0-9]")) {
+
+            if (newNumber || display.getText().equals("0")) {
+                display.setText(value);
+                newNumber = false;
+            } else {
+                display.setText(display.getText() + value);
+            }
+        }
+
+        // Clear button
+        else if (value.equals("C")) {
+
+            display.setText("0");
+            firstNumber = 0;
+            operator = "";
+            newNumber = true;
+        }
+
+        // Equal button
+        else if (value.equals("=")) {
+
+            if (!operator.isEmpty()) {
+
+                double secondNumber =
+                    Double.parseDouble(display.getText());
+
+                double result;
+
+                try {
+
+                    switch (operator) {
+
+                        case "+":
+                            result = firstNumber + secondNumber;
+                            break;
+
+                        case "-":
+                            result = firstNumber - secondNumber;
+                            break;
+
+                        case "*":
+                            result = firstNumber * secondNumber;
+                            break;
+
+                        case "/":
+
+                            if (secondNumber == 0) {
+                                throw new ArithmeticException(
+                                    "Cannot divide by zero"
+                                );
+                            }
+
+                            result = firstNumber / secondNumber;
+                            break;
+
+                        default:
+                            return;
+                    }
+
+                    display.setText(String.valueOf(result));
+
+                } catch (ArithmeticException ex) {
+
+                    display.setText(ex.getMessage());
+                }
+
+                operator = "";
+                newNumber = true;
+            }
+        }
+
+        // Operator button
+        else {
+
+            if (!operator.isEmpty() && !newNumber) {
+                return;
+            }
+
+            firstNumber = Double.parseDouble(display.getText());
+            operator = value;
+            newNumber = true;
+        }
+    }
+
+    // Main method
+    public static void main(String[] args) {
+
+        SwingUtilities.invokeLater(() -> {
+
+            App calculator = new App();
+            calculator.setVisible(true);
+
+        });
+    }
+}
