@@ -1,27 +1,29 @@
 
+
 package com.example;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class Calculator extends JFrame implements ActionListener {
+public class App extends JFrame implements ActionListener {
 
-    JTextField display;
-    double firstNumber = 0;
-    String operator = "";
-    boolean newNumber = true;
+    private JTextField display;
 
-    // Connect business logic
-    App calculator = new App();
+    private double firstNumber = 0;
+    private String operator = "";
+    private boolean newNumber = true;
 
-    public Calculator() {
+    // Constructor
+    public App() {
 
         setTitle("Java Calculator");
         setSize(350, 450);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setLayout(new BorderLayout(5, 5));
 
+        // Display
         display = new JTextField("0");
         display.setFont(new Font("Arial", Font.BOLD, 28));
         display.setHorizontalAlignment(JTextField.RIGHT);
@@ -29,6 +31,7 @@ public class Calculator extends JFrame implements ActionListener {
 
         add(display, BorderLayout.NORTH);
 
+        // Button panel
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(4, 4, 5, 5));
 
@@ -39,21 +42,26 @@ public class Calculator extends JFrame implements ActionListener {
             "C", "0", "=", "+"
         };
 
+        // Create buttons
         for (String text : buttons) {
+
             JButton button = new JButton(text);
             button.setFont(new Font("Arial", Font.BOLD, 22));
             button.addActionListener(this);
+
             panel.add(button);
         }
 
         add(panel, BorderLayout.CENTER);
     }
 
+    // Button click handling
     @Override
     public void actionPerformed(ActionEvent e) {
 
         String value = e.getActionCommand();
 
+        // Number buttons
         if (value.matches("[0-9]")) {
 
             if (newNumber || display.getText().equals("0")) {
@@ -62,15 +70,19 @@ public class Calculator extends JFrame implements ActionListener {
             } else {
                 display.setText(display.getText() + value);
             }
+        }
 
-        } else if (value.equals("C")) {
+        // Clear button
+        else if (value.equals("C")) {
 
             display.setText("0");
             firstNumber = 0;
             operator = "";
             newNumber = true;
+        }
 
-        } else if (value.equals("=")) {
+        // Equal button
+        else if (value.equals("=")) {
 
             if (!operator.isEmpty()) {
 
@@ -84,19 +96,26 @@ public class Calculator extends JFrame implements ActionListener {
                     switch (operator) {
 
                         case "+":
-                            result = calculator.add(firstNumber, secondNumber);
+                            result = firstNumber + secondNumber;
                             break;
 
                         case "-":
-                            result = calculator.subtract(firstNumber, secondNumber);
+                            result = firstNumber - secondNumber;
                             break;
 
                         case "*":
-                            result = calculator.multiply(firstNumber, secondNumber);
+                            result = firstNumber * secondNumber;
                             break;
 
                         case "/":
-                            result = calculator.divide(firstNumber, secondNumber);
+
+                            if (secondNumber == 0) {
+                                throw new ArithmeticException(
+                                    "Cannot divide by zero"
+                                );
+                            }
+
+                            result = firstNumber / secondNumber;
                             break;
 
                         default:
@@ -105,29 +124,35 @@ public class Calculator extends JFrame implements ActionListener {
 
                     display.setText(String.valueOf(result));
 
-                } catch (IllegalArgumentException ex) {
+                } catch (ArithmeticException ex) {
 
                     display.setText(ex.getMessage());
-
                 }
 
                 operator = "";
                 newNumber = true;
             }
+        }
 
-        } else {
+        // Arithmetic operators
+        else {
 
-            firstNumber = Double.parseDouble(display.getText());
+            firstNumber =
+                Double.parseDouble(display.getText());
+
             operator = value;
             newNumber = true;
         }
     }
 
+    // Main method
     public static void main(String[] args) {
 
         SwingUtilities.invokeLater(() -> {
-            Calculator calculator = new Calculator();
+
+            App calculator = new App();
             calculator.setVisible(true);
+
         });
     }
 }
