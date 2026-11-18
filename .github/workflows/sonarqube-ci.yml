@@ -1,5 +1,6 @@
 
 
+
 name: 02 - SonarQube Analysis
 
 on:
@@ -19,6 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
@@ -27,12 +29,22 @@ jobs:
           java-version: '17'
           cache: maven
 
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
       - name: Run SonarQube analysis
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn clean verify sonar:sonar \
+          mvn -B clean verify \
+            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=ci-cd-project \
+            -Dsonar.projectName=ci-cd-project \
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.qualitygate.wait=true
@@ -45,3 +57,4 @@ jobs:
         with:
           name: java-app-jar
           path: target/*.jar
+          if-no-files-found: error
